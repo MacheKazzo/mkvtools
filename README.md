@@ -6,6 +6,11 @@ These scripts use the [MKVToolNix](https://mkvtoolnix.download/) package.
 These scripts should work on UNIX, Windows, Mac OS. I only have Windows 10, so please let me know if there are any problems.  
   
 mkv_extract.py and/or font_parser.py need to be always with the scripts folder!  
+  
+Python module used:  
+-my_function (so mkv_extract and font_parser): os,subprocess,collections,itertools,logging,re,ass,fontTools  
+-mkv_extract: tempfile,os,textwrap,subprocess,argparse,sys  
+-font_parser: os,textwrap,subprocess,argparse,sys  
 
 ### Presets
 To get started go to scripts/presets.py and you will find the "preset" class.  
