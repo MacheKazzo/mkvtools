@@ -37,5 +37,5 @@ font_parser.py does:
 -return what fonts are used in subtitles or mkvs, if some fonts are found in the given folders it return these fonts.  
 -delete unused or duplicate fonts in mkvs and add found missing fonts in mkvs.  
   
-Through the -h argument from the terminal it is possible to view the arguments:    
+Through the -h argument from the terminal it is possible to view the arguments and an example of how to use it:    
 ![Screenshot](https://github.com/MacheKazzo/mkvtools/blob/main/images/font_parser-screen-1.png)
