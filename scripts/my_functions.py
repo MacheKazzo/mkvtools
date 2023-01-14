@@ -3,7 +3,6 @@ from os import listdir
 from subprocess import run,getoutput
 from scripts.presets import preset,file_ext
 import collections
-import io
 import itertools
 import logging
 import re
