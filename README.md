@@ -4,6 +4,8 @@ It contains 2 python scripts, hopefully useful for those who want to quickly ext
 The font parsing part contains a modified version of the "fontvalidator.py" script by [Myaamori-Aegisub-Scripts](https://github.com/TypesettingTools/Myaamori-Aegisub-Scripts/).  
 These scripts use the [MKVToolNix](https://mkvtoolnix.download/) package.  
 These scripts should work on UNIX, Windows, Mac OS. I only have Windows 10, so please let me know if there are any problems.  
+  
+mkv_extract.py and/or font_parser.py need to be always with the scripts folder!  
 
 ### Presets
 To get started go to scripts/presets.py and you will find the "preset" class.  
