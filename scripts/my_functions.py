@@ -75,7 +75,7 @@ def tracksex(temp,mkv_path,final_direc,preset,cmds=None):
                 if "all" in preset.base_langs or l in preset.base_langs:
                     track_path=final_direc+"sub "+l+searchext(ttype)
             else:
-                track_path=final_direc+"audio-ID"+ID+searchext(ttype)
+                track_path=final_direc+t+"-ID"+ID+searchext(ttype)
             if not cmds==None:
                 cmds.merge(preset.mkvextr+" \""+mkv_path+"\" tracks "+ID+":\""+track_path+"\"")
             tracks.append({"type":t,"codec":ttype,"id":ID,"path":track_path})
