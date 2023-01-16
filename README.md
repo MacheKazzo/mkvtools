@@ -9,8 +9,8 @@ mkv_extract.py and/or font_parser.py need to be always with the scripts folder!
   
 Python module used:  
 -my_function (so mkv_extract and font_parser): os,subprocess,collections,itertools,logging,re,ass,fontTools  
--mkv_extract: tempfile,os,textwrap,subprocess,argparse,sys  
--font_parser: os,textwrap,subprocess,argparse,sys  
+-mkv_extract: tempfile,os,textwrap,subprocess,argparse,sys,json  
+-font_parser: os,textwrap,subprocess,argparse,sys,json  
 
 ### Presets
 To get started go to scripts/presets.py and you will find the "preset" class.  
