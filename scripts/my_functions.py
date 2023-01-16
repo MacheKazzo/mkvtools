@@ -9,7 +9,6 @@ import re
 import ass
 from fontTools.ttLib import ttFont
 from fontTools.misc import encodingTools
-import json
 
 
 class commands:
