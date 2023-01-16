@@ -7,6 +7,7 @@ from textwrap import dedent
 from subprocess import run
 import argparse
 import sys
+from json import loads
 
 preset=preset()
 preset.tracks=["subtitles"]
@@ -15,7 +16,7 @@ preset.tracks=["subtitles"]
 def sub_main(direc,tmp_dir,fontfolder_list,is_mkv=False,not_remove=False):
     sub_direc=direc
     if is_mkv:
-        temp=my.get_temp(direc)
+        temp=loads(my.get_out(direc))
         cmds=my.commands()
         attachments=my.attachmentsex(temp,direc,tmp_dir,preset,cmds)
         tracks=my.tracksex(temp,direc,tmp_dir,preset,cmds)
@@ -96,7 +97,7 @@ def sub_main(direc,tmp_dir,fontfolder_list,is_mkv=False,not_remove=False):
         #final check
         print("\nFinal check:")
         cmds=my.commands()
-        temp=my.get_temp(direc)
+        temp=loads(my.get_out(direc))
         attachments=my.attachmentsex(temp,direc,tmp_dir,preset,cmds)
         my.run_cmds(cmds.cmd)
         check_list=[[a["name"],a["path"]] for a in attachments]
@@ -125,11 +126,11 @@ def main():
    
     files=my.get_files(direc,(".mkv",".ass",".saa"))
 
-    #fonts in fontpath_list (folders)
     fonts=my.get_files(fontpath_list,(".ttf",".ttc",".otf"))
     fontfolder_rawlist=my.FontCollection([(f["name"],f["path"]) for f in fonts]).fonts_info
     existing_dicts=set()
     fontfolder_list=[]
+    
     for f in fontfolder_rawlist:
         font=tuple(f['full'])
         if (font) not in existing_dicts:
