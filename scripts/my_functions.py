@@ -1,6 +1,6 @@
 from os.path import isdir,isfile,basename
 from os import listdir
-from subprocess import run,getoutput
+from subprocess import run,getoutput,Popen,PIPE
 from scripts.presets import preset,file_ext
 import collections
 import itertools
@@ -9,6 +9,7 @@ import re
 import ass
 from fontTools.ttLib import ttFont
 from fontTools.misc import encodingTools
+import json
 
 
 class commands:
@@ -39,75 +40,40 @@ def run_cmds(cmds):
     return 0
 
 
-def get_temp(mkv_path):
-    temp=getoutput(preset.mkvmerg+" -J \""+mkv_path+"\"")
+def get_out(mkv_path):
+    with Popen(preset.mkvmerg+" -J \""+mkv_path+"\"",stdout=PIPE, stderr=PIPE) as p:
+        output,errors=p.communicate()
+    temp=output.decode('utf-8')
     return temp
 
 
 def tracksex(temp,mkv_path,final_direc,preset,cmds=None):
     final_direc+="/tracks/"
-    search_start="\"tracks\": ["
-    search_end="],"
-    sec_1="\"id\": "
-    sec_2="\n    }"
-    sec_3="      \"type\": \""
-    sec_4="\""
-    sec_5="\"codec_id\": \""
-    sec_6=","
-    sec_7="\"language\": \""
     tracks=[]
-    start=temp.find(search_start)+len(search_start)
-    end=temp.find(search_end,start)
-    c=temp.count(sec_1,start,end)
-    for n in range(c):
-        a=temp.find(sec_1,start,end)+len(sec_1)
-        start=temp.find(sec_2,a,end)
-        sez=temp[a:start]
-        b=sez.find(sec_3)+len(sec_3)
-        t=sez[b:sez.find(sec_4,b)]
-        if t in preset.base_tracks:
-            ID=sez[:sez.find(sec_6)]
-            z=sez.find(sec_5)+len(sec_5)
-            ttype=sez[z:sez.find(sec_4,z)]
-            if t=="subtitles":
-                y=sez.find(sec_7)+len(sec_7)
-                l=sez[y:sez.find(sec_4,y)]
-                if "all" in preset.base_langs or l in preset.base_langs:
-                    track_path=final_direc+"sub "+l+searchext(ttype)
+    for t in temp["tracks"]:
+        if t["type"] in preset.base_tracks:
+            if t["type"]=="subtitles" and ("all" in preset.base_langs or t["properties"]["language"] in preset.base_langs):
+                track_path=final_direc+"sub "+t["properties"]["language"]+"-ID"+str(t["id"])+searchext(t["properties"]["codec_id"])
             else:
-                track_path=final_direc+t+"-ID"+ID+searchext(ttype)
+                track_path=final_direc+t["type"]+"-ID"+str(t["id"])+searchext(t["properties"]["codec_id"])
             if not cmds==None:
-                cmds.merge(preset.mkvextr+" \""+mkv_path+"\" tracks "+ID+":\""+track_path+"\"")
-            tracks.append({"type":t,"codec":ttype,"id":ID,"path":track_path})
+                cmds.merge(preset.mkvextr+" \""+mkv_path+"\" tracks "+str(t["id"])+":\""+track_path+"\"")
+            tracks.append({"type":t["type"],"codec":t["properties"]["codec_id"],"id":str(t["id"]),"path":track_path})
     return tracks
 
 
 def attachmentsex(temp,mkv_path,final_direc,preset,cmds=None):
     final_direc+="/attachments/"
-    search_start="\"attachments\": ["
-    search_end="],"
-    sec_1="\"file_name\": \""
-    sec_2="\",\n      \"id\": "
-    sec_3=",\n      \""
     attachments=[]
-    start=temp.find(search_start)+len(search_start)
-    end=temp.find(search_end,start)
-    c=temp.count(sec_1,start,end)
-    for n in range(c):
-        a=temp.find(sec_1,start,end)+len(sec_1)
-        start=temp.find(sec_2,a,end)
-        name=temp[a:start]
-        start+=len(sec_2)
-        b=temp.find(sec_3,start,end)
-        ID=temp[start:b]
-        attach_path=final_direc+name
+    for a in temp["attachments"]:
+        attach_path=final_direc+a["file_name"]
         if not cmds==None:
-            cmds.merge(preset.mkvextr+" \""+mkv_path+"\" attachments "+ID+":\""+attach_path+"\"")
-        attachments.append({"name":name,"id":ID,"path":attach_path})
+            cmds.merge(preset.mkvextr+" \""+mkv_path+"\" attachments "+str(a["id"])+":\""+attach_path+"\"")
+        attachments.append({"name":a["file_name"],"id":str(a["id"]),"type":a["content_type"],"path":attach_path})
     return attachments
+        
 
-
-def chaptersex(temp,mkv_path,final_direc,preset,cmds=None):
+def chaptersex(mkv_path,final_direc,preset,cmds=None):
     chap_path=final_direc+"/chapters.xml"
     if not cmds==None:
         cmds.merge(preset.mkvextr+" \""+mkv_path+"\" chapters \""+chap_path+"\"")
@@ -130,7 +96,7 @@ def search_files(direc,exts=None):
         raise Exception("exts need to be a str, list, tuple variable or None. If None take all files in the directory.")
     return files
 
-def get_files(direc,exts):#da migliorare
+def get_files(direc,exts):
     files=[]
     for d in direc:
         if isdir(d):
@@ -302,11 +268,16 @@ class FontCollection:
         for name, f in fontfiles:
             try:
                 font = Font(f)
-                self.fonts_info.append({"name": name,"family": font.family_names,"full": font.full_names,"path": f})#_______________________________
+                familyn=font.family_names
+                fulln=font.full_names
                 self.fonts.append(font)
                 if font.num_fonts > 1:
                     for i in range(1, font.num_fonts):
-                        self.fonts.append(Font(f, font_number=i))
+                        font=Font(f, font_number=i)
+                        self.fonts.append(font)
+                        familyn.extend(font.family_names)
+                        fulln.extend(font.full_names)
+                self.fonts_info.append({"name": name,"family": familyn,"full": fulln,"path": f})
             except Exception as e:
                 print(f"Error reading {name}: {e}")
 
@@ -380,7 +351,6 @@ def validate_fonts(doc, fonts, warn_on_exact):
                 report["mismatch_bold"][state.font, state.weight, font.weight].add(nline)
 
             if state.italic and not font.italic and warn_on_exact:
-                #print(state.font)
                 report["faux_italic"][state.font].add(nline)
 
             if not state.italic and font.italic and not exact_match and warn_on_exact:
@@ -439,7 +409,3 @@ def font_onsubs(direc,font_list,warnings=False):
     for name, doc in subtitles:
         missing_fonts=validate_fonts(doc,fonts,warnings)
     return missing_fonts
-
-
-
-
