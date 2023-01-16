@@ -34,7 +34,7 @@ class preset:
 ## mkv_extract
 mkv_extract.py extract attachments, tracks, chapters from mkv.
 If tracks are selected allows you to choose between subtitles, audio and video.  
-If subtitle are selected allows you to choose the language of the subtitles to extract.  
+If subtitle are selected allows you to choose the language of the subtitles to extract (if "all" extract all languages).  
   
 Through the -h argument from the terminal it is possible to view the arguments and an example of how to use it:    
 ![Screenshot](https://github.com/MacheKazzo/mkvtools/blob/main/images/mkv_extract-screen-1.png)
