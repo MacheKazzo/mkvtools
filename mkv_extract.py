@@ -5,6 +5,7 @@ from os.path import isdir,basename
 from textwrap import dedent
 import argparse
 import sys
+from json import loads
 
 preset=preset()
 cmds=my.commands()
@@ -12,22 +13,28 @@ cmds=my.commands()
 def extract(mkv):
     sup_base=mkv["path"][:-len(mkv["name"])-1]
     final_dir=preset.base_final+"/"+basename(sup_base)+"/"+mkv["name"][:-4]
+    
+    try:
+        temp=loads(my.get_out(mkv["path"]))
+    except:
+        return 0
+    
     try:
         makedirs(final_dir)
     except:
         pass
+    
     if isdir(final_dir):
         pass
     else:
         raise Exception ("Fail to create the final directory")
     
-    temp=my.get_temp(mkv["path"])
     if "attachments" in preset.base_elements:
         my.attachmentsex(temp,mkv["path"],final_dir,preset,cmds)
     if "tracks" in preset.base_elements:
         my.tracksex(temp,mkv["path"],final_dir,preset,cmds)
     if "chapters" in preset.base_elements:
-        my.chaptersex(temp,mkv["path"],final_dir,preset,cmds)
+        my.chaptersex(mkv["path"],final_dir,preset,cmds)
     return 0
         
 
